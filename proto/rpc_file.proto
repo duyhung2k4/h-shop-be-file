@@ -5,14 +5,16 @@ package proto;
 option go_package = "grpc/proto";
 
 message InsertFileReq {
-  uint64 productId = 1;
-  bytes content = 2;
+  string productId = 1;
+  string typeModel = 2;
+  repeated bytes data = 3;
 }
 
 message InsertFileRes {
   uint64 id = 1;
-  uint64 productId = 2;
-  string href = 3;
+  string productId = 2;
+  string typeModel = 3;
+  repeated uint64 fileIds = 4;
 }
 
 service FileService {

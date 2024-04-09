@@ -11,7 +11,7 @@ import (
 )
 
 func RunServerGRPC() {
-	listenerGRPC, err := net.Listen("tcp", ":20003")
+	listenerGRPC, err := net.Listen("tcp", ":20004")
 
 	if err != nil {
 		log.Fatalln(listenerGRPC)

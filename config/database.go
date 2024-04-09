@@ -1,6 +1,7 @@
 package config
 
 import (
+	"app/model"
 	"fmt"
 	"log"
 
@@ -24,7 +25,9 @@ func connectPostgresql(migrate bool) error {
 	}
 
 	if migrate {
-		errMigrate := db.AutoMigrate()
+		errMigrate := db.AutoMigrate(
+			model.File{},
+		)
 		if errMigrate != nil {
 			return errMigrate
 		}
