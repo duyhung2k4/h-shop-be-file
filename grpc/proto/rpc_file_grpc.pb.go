@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileServiceClient interface {
-	InsertFile(ctx context.Context, in *InsertFileReq, opts ...grpc.CallOption) (*InsertFileRes, error)
+	InsertFile(ctx context.Context, opts ...grpc.CallOption) (FileService_InsertFileClient, error)
 }
 
 type fileServiceClient struct {
@@ -37,20 +37,45 @@ func NewFileServiceClient(cc grpc.ClientConnInterface) FileServiceClient {
 	return &fileServiceClient{cc}
 }
 
-func (c *fileServiceClient) InsertFile(ctx context.Context, in *InsertFileReq, opts ...grpc.CallOption) (*InsertFileRes, error) {
-	out := new(InsertFileRes)
-	err := c.cc.Invoke(ctx, FileService_InsertFile_FullMethodName, in, out, opts...)
+func (c *fileServiceClient) InsertFile(ctx context.Context, opts ...grpc.CallOption) (FileService_InsertFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &FileService_ServiceDesc.Streams[0], FileService_InsertFile_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &fileServiceInsertFileClient{stream}
+	return x, nil
+}
+
+type FileService_InsertFileClient interface {
+	Send(*InsertFileReq) error
+	CloseAndRecv() (*InsertFileRes, error)
+	grpc.ClientStream
+}
+
+type fileServiceInsertFileClient struct {
+	grpc.ClientStream
+}
+
+func (x *fileServiceInsertFileClient) Send(m *InsertFileReq) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *fileServiceInsertFileClient) CloseAndRecv() (*InsertFileRes, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(InsertFileRes)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // FileServiceServer is the server API for FileService service.
 // All implementations must embed UnimplementedFileServiceServer
 // for forward compatibility
 type FileServiceServer interface {
-	InsertFile(context.Context, *InsertFileReq) (*InsertFileRes, error)
+	InsertFile(FileService_InsertFileServer) error
 	mustEmbedUnimplementedFileServiceServer()
 }
 
@@ -58,8 +83,8 @@ type FileServiceServer interface {
 type UnimplementedFileServiceServer struct {
 }
 
-func (UnimplementedFileServiceServer) InsertFile(context.Context, *InsertFileReq) (*InsertFileRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method InsertFile not implemented")
+func (UnimplementedFileServiceServer) InsertFile(FileService_InsertFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method InsertFile not implemented")
 }
 func (UnimplementedFileServiceServer) mustEmbedUnimplementedFileServiceServer() {}
 
@@ -74,22 +99,30 @@ func RegisterFileServiceServer(s grpc.ServiceRegistrar, srv FileServiceServer) {
 	s.RegisterService(&FileService_ServiceDesc, srv)
 }
 
-func _FileService_InsertFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(InsertFileReq)
-	if err := dec(in); err != nil {
+func _FileService_InsertFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(FileServiceServer).InsertFile(&fileServiceInsertFileServer{stream})
+}
+
+type FileService_InsertFileServer interface {
+	SendAndClose(*InsertFileRes) error
+	Recv() (*InsertFileReq, error)
+	grpc.ServerStream
+}
+
+type fileServiceInsertFileServer struct {
+	grpc.ServerStream
+}
+
+func (x *fileServiceInsertFileServer) SendAndClose(m *InsertFileRes) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *fileServiceInsertFileServer) Recv() (*InsertFileReq, error) {
+	m := new(InsertFileReq)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(FileServiceServer).InsertFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: FileService_InsertFile_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FileServiceServer).InsertFile(ctx, req.(*InsertFileReq))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 // FileService_ServiceDesc is the grpc.ServiceDesc for FileService service.
@@ -98,12 +131,13 @@ func _FileService_InsertFile_Handler(srv interface{}, ctx context.Context, dec f
 var FileService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.FileService",
 	HandlerType: (*FileServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "InsertFile",
-			Handler:    _FileService_InsertFile_Handler,
+			StreamName:    "InsertFile",
+			Handler:       _FileService_InsertFile_Handler,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "proto/rpc_file.proto",
 }

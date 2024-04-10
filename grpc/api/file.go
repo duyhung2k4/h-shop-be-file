@@ -4,7 +4,7 @@ import (
 	"app/config"
 	"app/grpc/proto"
 	"app/model"
-	"context"
+	"io"
 
 	"gorm.io/gorm"
 )
@@ -14,18 +14,27 @@ type fileGRPC struct {
 	proto.UnsafeFileServiceServer
 }
 
-func (g *fileGRPC) InsertFile(ctx context.Context, req *proto.InsertFileReq) (*proto.InsertFileRes, error) {
+func (g *fileGRPC) InsertFile(stream proto.FileService_InsertFileServer) error {
 	var newFiles []model.File
-	for _, data := range req.Data {
+
+	for {
+		result, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+
 		newFiles = append(newFiles, model.File{
-			ProductID: req.ProductId,
-			Data:      data,
+			ProductID: result.ProductId,
+			Data:      result.Data,
 			TypeModel: model.PRODUCT,
+			Name:      result.Name,
+			Format:    result.Format,
+			Size:      uint64(len(result.Data)),
 		})
 	}
 
 	if err := g.db.Model(&model.File{}).Create(&newFiles).Error; err != nil {
-		return nil, err
+		return err
 	}
 
 	fileIds := []uint64{}
@@ -35,12 +44,14 @@ func (g *fileGRPC) InsertFile(ctx context.Context, req *proto.InsertFileReq) (*p
 	}
 
 	res := &proto.InsertFileRes{
-		ProductId: req.ProductId,
+		ProductId: newFiles[0].ProductID,
 		TypeModel: string(model.PRODUCT),
 		FileIds:   fileIds,
 	}
 
-	return res, nil
+	stream.SendAndClose(res)
+
+	return nil
 }
 
 func NewFileGRPC() proto.FileServiceServer {

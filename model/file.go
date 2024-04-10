@@ -6,6 +6,8 @@ type File struct {
 	gorm.Model
 	TypeModel TYPE_MODEL `json:"typeModel"`
 	Format    string     `json:"format"`
+	Name      string     `json:"name"`
+	Size      uint64     `json:"size"`
 	Data      []byte     `json:"data"`
 	ProductID string     `json:"productId"`
 }
