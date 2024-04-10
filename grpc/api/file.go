@@ -4,8 +4,10 @@ import (
 	"app/config"
 	"app/grpc/proto"
 	"app/model"
+	"context"
 	"io"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gorm.io/gorm"
 )
 
@@ -54,8 +56,44 @@ func (g *fileGRPC) InsertFile(stream proto.FileService_InsertFileServer) error {
 	return nil
 }
 
+func (g *fileGRPC) DeleteFile(ctx context.Context, req *proto.DeleteFileReq) (*proto.DeleteFileRes, error) {
+	listIds := req.Ids
+	if err := g.db.Model(&model.File{}).Unscoped().Delete(&model.File{}, listIds).Error; err != nil {
+		return nil, err
+	}
+	return &proto.DeleteFileRes{
+		Mess: "",
+	}, nil
+}
+
+func (g *fileGRPC) GetFileIdsWithProductId(ctx context.Context, req *proto.GetFileIdsWithProductIdReq) (*proto.GetFileIdsWithProductIdRes, error) {
+	var fileResults []GetFileIdsWithProductIdReturnQuery
+	ids := []uint64{}
+
+	objID, errObjID := primitive.ObjectIDFromHex(req.ProductId)
+	if errObjID != nil {
+		return nil, errObjID
+	}
+
+	if err := g.db.Model(&model.File{}).Select("id").Where("product_id = ?", objID.String()).Scan(&fileResults).Error; err != nil {
+		return nil, err
+	}
+
+	for _, file := range fileResults {
+		ids = append(ids, uint64(file.Id))
+	}
+
+	return &proto.GetFileIdsWithProductIdRes{
+		Ids: ids,
+	}, nil
+}
+
 func NewFileGRPC() proto.FileServiceServer {
 	return &fileGRPC{
 		db: config.GetDB(),
 	}
+}
+
+type GetFileIdsWithProductIdReturnQuery struct {
+	Id uint
 }
