@@ -1,6 +1,7 @@
 package main
 
 import (
+	"app/config"
 	"app/grpc"
 	"app/router"
 	"log"
@@ -20,7 +21,7 @@ func main() {
 
 	go func() {
 		server := http.Server{
-			Addr:         ":18884",
+			Addr:         ":" + config.GetAppPort(),
 			Handler:      router.Router(),
 			ReadTimeout:  time.Second * 30,
 			WriteTimeout: time.Second * 30,

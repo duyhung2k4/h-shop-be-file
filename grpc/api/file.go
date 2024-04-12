@@ -7,7 +7,6 @@ import (
 	"context"
 	"io"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gorm.io/gorm"
 )
 
@@ -70,12 +69,7 @@ func (g *fileGRPC) GetFileIdsWithProductId(ctx context.Context, req *proto.GetFi
 	var fileResults []GetFileIdsWithProductIdReturnQuery
 	ids := []uint64{}
 
-	objID, errObjID := primitive.ObjectIDFromHex(req.ProductId)
-	if errObjID != nil {
-		return nil, errObjID
-	}
-
-	if err := g.db.Model(&model.File{}).Select("id").Where("product_id = ?", objID.String()).Scan(&fileResults).Error; err != nil {
+	if err := g.db.Model(&model.File{}).Select("id").Where("product_id = ?", req.ProductId).Scan(&fileResults).Error; err != nil {
 		return nil, err
 	}
 
