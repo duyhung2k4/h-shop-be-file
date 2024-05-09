@@ -57,6 +57,11 @@ func (g *fileGRPC) InsertFile(stream proto.FileService_InsertFileServer) error {
 
 func (g *fileGRPC) DeleteFile(ctx context.Context, req *proto.DeleteFileReq) (*proto.DeleteFileRes, error) {
 	listIds := req.Ids
+	if len(listIds) == 0 {
+		return &proto.DeleteFileRes{
+			Mess: "",
+		}, nil
+	}
 	if err := g.db.Model(&model.File{}).Unscoped().Delete(&model.File{}, listIds).Error; err != nil {
 		return nil, err
 	}

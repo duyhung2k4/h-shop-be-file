@@ -7,7 +7,6 @@ require (
 	github.com/go-chi/jwtauth/v5 v5.3.1
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.5.1
-	go.mongodb.org/mongo-driver v1.14.0
 	google.golang.org/grpc v1.63.0
 	google.golang.org/protobuf v1.33.0
 	gorm.io/driver/postgres v1.5.7
