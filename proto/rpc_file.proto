@@ -14,7 +14,6 @@ message InsertFileReq {
 message InsertFileRes {
   uint64 id = 1;
   string productId = 2;
-  string typeModel = 3;
   repeated uint64 fileIds = 4;
 }
 
@@ -32,8 +31,20 @@ message GetFileIdsWithProductIdRes {
     repeated uint64 ids = 1;
 }
 
+message InsertAvatarProductReq {
+    string productId = 1;
+    string name = 2;
+    string format = 3;
+    bytes data = 4;
+}
+message InsertAvatarProductRes {
+    uint64 id = 1;
+    string productId = 2;
+}
+
 service FileService {
   rpc InsertFile(stream InsertFileReq) returns (InsertFileRes) {}
   rpc DeleteFile(DeleteFileReq) returns (DeleteFileRes) {}
   rpc GetFileIdsWithProductId(GetFileIdsWithProductIdReq) returns (GetFileIdsWithProductIdRes) {}
+  rpc InsertAvatarProduct(InsertAvatarProductReq) returns (InsertAvatarProductRes) {}
 }

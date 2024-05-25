@@ -22,6 +22,7 @@ const (
 	FileService_InsertFile_FullMethodName              = "/proto.FileService/InsertFile"
 	FileService_DeleteFile_FullMethodName              = "/proto.FileService/DeleteFile"
 	FileService_GetFileIdsWithProductId_FullMethodName = "/proto.FileService/GetFileIdsWithProductId"
+	FileService_InsertAvatarProduct_FullMethodName     = "/proto.FileService/InsertAvatarProduct"
 )
 
 // FileServiceClient is the client API for FileService service.
@@ -31,6 +32,7 @@ type FileServiceClient interface {
 	InsertFile(ctx context.Context, opts ...grpc.CallOption) (FileService_InsertFileClient, error)
 	DeleteFile(ctx context.Context, in *DeleteFileReq, opts ...grpc.CallOption) (*DeleteFileRes, error)
 	GetFileIdsWithProductId(ctx context.Context, in *GetFileIdsWithProductIdReq, opts ...grpc.CallOption) (*GetFileIdsWithProductIdRes, error)
+	InsertAvatarProduct(ctx context.Context, in *InsertAvatarProductReq, opts ...grpc.CallOption) (*InsertAvatarProductRes, error)
 }
 
 type fileServiceClient struct {
@@ -93,6 +95,15 @@ func (c *fileServiceClient) GetFileIdsWithProductId(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *fileServiceClient) InsertAvatarProduct(ctx context.Context, in *InsertAvatarProductReq, opts ...grpc.CallOption) (*InsertAvatarProductRes, error) {
+	out := new(InsertAvatarProductRes)
+	err := c.cc.Invoke(ctx, FileService_InsertAvatarProduct_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileServiceServer is the server API for FileService service.
 // All implementations must embed UnimplementedFileServiceServer
 // for forward compatibility
@@ -100,6 +111,7 @@ type FileServiceServer interface {
 	InsertFile(FileService_InsertFileServer) error
 	DeleteFile(context.Context, *DeleteFileReq) (*DeleteFileRes, error)
 	GetFileIdsWithProductId(context.Context, *GetFileIdsWithProductIdReq) (*GetFileIdsWithProductIdRes, error)
+	InsertAvatarProduct(context.Context, *InsertAvatarProductReq) (*InsertAvatarProductRes, error)
 	mustEmbedUnimplementedFileServiceServer()
 }
 
@@ -115,6 +127,9 @@ func (UnimplementedFileServiceServer) DeleteFile(context.Context, *DeleteFileReq
 }
 func (UnimplementedFileServiceServer) GetFileIdsWithProductId(context.Context, *GetFileIdsWithProductIdReq) (*GetFileIdsWithProductIdRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFileIdsWithProductId not implemented")
+}
+func (UnimplementedFileServiceServer) InsertAvatarProduct(context.Context, *InsertAvatarProductReq) (*InsertAvatarProductRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InsertAvatarProduct not implemented")
 }
 func (UnimplementedFileServiceServer) mustEmbedUnimplementedFileServiceServer() {}
 
@@ -191,6 +206,24 @@ func _FileService_GetFileIdsWithProductId_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileService_InsertAvatarProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InsertAvatarProductReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).InsertAvatarProduct(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileService_InsertAvatarProduct_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).InsertAvatarProduct(ctx, req.(*InsertAvatarProductReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileService_ServiceDesc is the grpc.ServiceDesc for FileService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -205,6 +238,10 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFileIdsWithProductId",
 			Handler:    _FileService_GetFileIdsWithProductId_Handler,
+		},
+		{
+			MethodName: "InsertAvatarProduct",
+			Handler:    _FileService_InsertAvatarProduct_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
