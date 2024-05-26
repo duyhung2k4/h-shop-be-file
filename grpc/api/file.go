@@ -97,7 +97,7 @@ func (g *fileGRPC) InsertAvatarProduct(ctx context.Context, req *proto.InsertAva
 
 	err := g.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(&model.File{}).
-			Where("product_id = ? AND is_avatar = ?", req.ProductId, true).Error; err != nil {
+			Where("product_id = ? AND is_avatar = ?", req.ProductId, true).Delete(&model.File{}).Error; err != nil {
 			return err
 		}
 
