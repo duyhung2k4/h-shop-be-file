@@ -16,6 +16,7 @@ type imageProductController struct {
 
 type ImageProductController interface {
 	GetImagesbyProductId(w http.ResponseWriter, r *http.Request)
+	GetAvatarByProductId(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *imageProductController) GetImagesbyProductId(w http.ResponseWriter, r *http.Request) {
@@ -45,6 +46,30 @@ func (c *imageProductController) GetImagesbyProductId(w http.ResponseWriter, r *
 
 	res := Response{
 		Data:    imageResponse,
+		Message: "OK",
+		Status:  200,
+		Error:   nil,
+	}
+
+	render.JSON(w, r, res)
+}
+
+func (c *imageProductController) GetAvatarByProductId(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	productId := query.Get("id")
+
+	if productId == "" {
+		badRequest(w, r, errors.New("product id not empty"))
+	}
+
+	image, err := c.imageProductService.GetAvatarByProductId(productId)
+	if err != nil {
+		internalServerError(w, r, err)
+		return
+	}
+
+	res := Response{
+		Data:    image,
 		Message: "OK",
 		Status:  200,
 		Error:   nil,

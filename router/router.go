@@ -43,6 +43,7 @@ func Router() http.Handler {
 		r.Route("/public", func(public chi.Router) {
 			public.Route("/image-product", func(imageProduct chi.Router) {
 				imageProduct.Get("/productId", imageController.GetImagesbyProductId)
+				imageProduct.Get("/avatar", imageController.GetAvatarByProductId)
 			})
 		})
 	})
